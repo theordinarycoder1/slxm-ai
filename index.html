@@ -1,0 +1,1191 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLXM AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+:root{--bg:#090b0a;--panel:#101411;--panel2:#171e19;--panel3:#202920;--border:#29332b;--text:#f3f6f2;--muted:#89958b;--green:#b7f36b;--green-dark:#1c2a12;--danger:#ff7777;--font-size:15px;--sidebar-width:260px}
+body.light{--bg:#f3f6f1;--panel:#fff;--panel2:#edf2e9;--panel3:#e3eadf;--border:#d8e0d4;--text:#172017;--muted:#667366;--green:#679b29;--green-dark:#e7f1dc;--danger:#c33}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100dvh;overflow:hidden;font-size:var(--font-size);transition:background .2s,color .2s}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.app{height:100dvh;display:flex;overflow:hidden}
+.sidebar{width:var(--sidebar-width);flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);padding:17px;display:flex;flex-direction:column;gap:12px;transition:transform .25s,width .25s;z-index:15}
+.brand{display:flex;align-items:center;gap:11px;font-size:21px;font-weight:800;letter-spacing:-1px;padding:3px 2px 9px}
+.logo,.welcome-logo{background:var(--green);color:#10160a;display:grid;place-items:center;font-weight:900}
+.logo{width:36px;height:36px;border-radius:12px}
+.new-chat,.side-button{border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:11px 13px;border-radius:12px;text-align:left;transition:.2s;display:flex;align-items:center;gap:10px}
+.new-chat{background:var(--green);color:#10160a;border-color:var(--green);font-weight:800}
+.new-chat:hover,.primary-button:hover,.send-button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.side-button:hover{border-color:var(--green);background:var(--panel3)}
+.side-label{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:1.2px}
+.sidebar-search{position:relative}
+.sidebar-search input{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:10px 12px 10px 34px;border-radius:10px;outline:none;font-size:12px}
+.sidebar-search input:focus{border-color:var(--green)}
+.search-symbol{position:absolute;left:11px;top:9px;color:var(--muted)}
+.history{overflow:auto;display:flex;flex-direction:column;gap:5px;min-height:60px}
+.history-row{display:flex;align-items:center;gap:3px;border-radius:10px}
+.history-row:hover{background:var(--panel2)}
+.history-item{flex:1;min-width:0;border:0;background:transparent;color:var(--text);text-align:left;padding:10px 8px;border-radius:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.history-item.active{background:var(--panel3)}
+.history-item .pin-mark{color:var(--green);margin-right:5px}
+.chat-actions{display:flex;gap:1px;padding-right:3px}
+.chat-actions button{border:0;background:transparent;color:var(--muted);padding:6px;border-radius:7px;font-size:12px}
+.chat-actions button:hover{background:var(--panel3);color:var(--text)}
+.empty-history{font-size:12px;color:var(--muted);padding:12px 5px}
+.sidebar-bottom{margin-top:auto}
+.user-area{border-top:1px solid var(--border);padding-top:14px}
+.user-line{display:flex;align-items:center;gap:9px;min-width:0}
+.avatar{width:35px;height:35px;border-radius:50%;background:var(--green-dark);color:var(--green);display:grid;place-items:center;font-weight:800;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-info strong{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis}
+.user-info small{color:var(--muted);font-size:10px}
+.logout{border:0;background:transparent;color:var(--muted);font-size:11px;padding:7px}
+.logout:hover{color:var(--green)}
+.main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.topbar{min-height:65px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 23px;flex-shrink:0;gap:15px;background:var(--bg);z-index:3}
+.top-left{display:flex;align-items:center;gap:12px;min-width:0}
+.top-title{font-weight:800;font-size:14px}
+.top-subtitle{font-size:10px;color:var(--muted);margin-top:2px}
+.top-actions{display:flex;align-items:center;gap:9px}
+.top-icon{width:37px;height:37px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:11px;transition:.2s}
+.top-icon:hover{border-color:var(--green);background:var(--panel2)}
+.mobile-menu{display:none;background:transparent;color:var(--text);border:0;font-size:21px}
+.mode-picker{position:relative;z-index:5}
+.mode-trigger{min-width:145px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 11px;color:var(--text);background:var(--panel2);border:1px solid var(--border);border-radius:13px;transition:.2s}
+.mode-trigger:hover,.mode-picker.open .mode-trigger{border-color:var(--green)}
+.mode-trigger-left{display:flex;align-items:center;gap:9px}
+.mode-icon,.option-icon{display:grid;place-items:center;background:var(--green-dark);color:var(--green);border-radius:9px}
+.mode-icon{width:30px;height:30px}
+.mode-trigger-text{text-align:left}
+.mode-trigger-text strong,.option-info strong{display:block;font-size:12px}
+.mode-trigger-text small,.option-info small{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+.mode-chevron{color:var(--muted);transition:.2s}
+.mode-picker.open .mode-chevron{transform:rotate(180deg)}
+.mode-menu{position:absolute;top:calc(100% + 9px);right:0;width:245px;padding:7px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 50px #0009;opacity:0;visibility:hidden;transform:translateY(-7px) scale(.98);transition:.2s}
+.mode-picker.open .mode-menu{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.mode-option{width:100%;display:flex;align-items:center;gap:11px;padding:11px;border:0;border-radius:11px;background:transparent;color:var(--text);text-align:left}
+.mode-option:hover,.mode-option.active{background:var(--panel2)}
+.option-icon{width:34px;height:34px;flex-shrink:0}
+.option-info{flex:1}
+.option-check{color:var(--green);opacity:0}
+.mode-option.active .option-check{opacity:1}
+.hidden-model-select{display:none}
+.messages{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:30px 20px;display:flex;flex-direction:column;gap:23px;overscroll-behavior:contain;scroll-behavior:smooth;scrollbar-gutter:stable}
+.messages::-webkit-scrollbar,.history::-webkit-scrollbar{width:6px}
+.messages::-webkit-scrollbar-thumb,.history::-webkit-scrollbar-thumb{background:var(--border);border-radius:20px}
+.welcome{margin:auto;max-width:760px;width:100%;text-align:center;padding:25px 15px}
+.welcome-logo{width:61px;height:61px;border-radius:19px;font-size:28px;margin:0 auto 18px;box-shadow:0 8px 35px #b7f36b20}
+.welcome h1{font-size:clamp(27px,4vw,39px);margin:0 0 10px;letter-spacing:-1.7px}
+.welcome p{color:var(--muted);line-height:1.7;font-size:14px;max-width:530px;margin:0 auto}
+.welcome-kicker{font-size:10px;letter-spacing:2px;color:var(--green);font-weight:800;margin-bottom:12px}
+.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:27px auto 0;max-width:590px}
+.suggestion{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:14px;text-align:left;border-radius:13px;transition:.2s;font-size:12px}
+.suggestion:hover{border-color:var(--green);transform:translateY(-2px);background:var(--panel2)}
+.suggestion strong{display:block;margin-bottom:4px;font-size:12px}
+.suggestion small{color:var(--muted);font-size:10px}
+.message{width:100%;max-width:900px;margin:0 auto;display:flex;gap:13px;animation:messageIn .22s ease;flex-shrink:0}
+@keyframes messageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.message-avatar{width:32px;height:32px;flex-shrink:0;border-radius:11px;display:grid;place-items:center;font-size:12px;font-weight:800;background:var(--green);color:#10160a}
+.message.user .message-avatar{background:var(--panel3);color:var(--text)}
+.message-content{min-width:0;flex:1;line-height:1.75;overflow-wrap:anywhere}
+.message-name{font-size:11px;color:var(--muted);font-weight:800;margin-bottom:6px}
+.message-text{white-space:pre-wrap;font-size:var(--font-size);line-height:1.75}
+.message-text pre{overflow:auto;background:var(--panel);padding:15px;border-radius:11px;border:1px solid var(--border);white-space:pre}
+.message-text code{font-family:Consolas,monospace;font-size:.9em}
+.message-text img{max-width:100%;border-radius:12px}
+.message-tools{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.message-tool{border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;padding:5px 9px;font-size:10px;transition:.2s}
+.message-tool:hover{color:var(--green);border-color:var(--green)}
+.typing{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px}
+.typing-dots{display:flex;gap:3px}
+.typing-dots i{width:5px;height:5px;border-radius:50%;background:var(--green);animation:bounce .8s infinite alternate}
+.typing-dots i:nth-child(2){animation-delay:.2s}
+.typing-dots i:nth-child(3){animation-delay:.4s}
+@keyframes bounce{to{opacity:.3;transform:translateY(-4px)}}
+.composer-area{padding:11px 20px 16px;flex-shrink:0;background:var(--bg);position:relative;z-index:4}
+.composer-wrap{max-width:900px;margin:auto}
+.composer{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:10px 11px;display:flex;align-items:flex-end;gap:9px;box-shadow:0 10px 35px #00000010;transition:.2s}
+.composer:focus-within{border-color:var(--green);box-shadow:0 0 0 3px #b7f36b10}
+#prompt{flex:1;min-width:0;resize:none;max-height:180px;min-height:34px;background:transparent;border:0;outline:0;color:var(--text);padding:7px 3px;line-height:1.5;font-size:13px}
+#prompt::placeholder{color:var(--muted)}
+.send-button{width:40px;height:40px;border:0;border-radius:12px;background:var(--green);color:#10160a;font-size:19px;font-weight:900;flex-shrink:0;transition:.2s}
+.send-button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.composer-tools{display:flex;align-items:center;gap:5px}
+.attach-button,.prompt-library-button{border:0;background:transparent;color:var(--muted);font-size:19px;padding:7px;border-radius:9px}
+.attach-button:hover,.prompt-library-button:hover{background:var(--panel2);color:var(--green)}
+.prompt-library-button{font-size:15px}
+#imagePreview{max-width:900px;margin:0 auto 8px;display:none;align-items:center;gap:8px}
+#imagePreview img{height:55px;border-radius:9px}
+#imagePreview button{background:var(--panel2);color:var(--text);border:0;border-radius:7px;padding:6px}
+.disclaimer{text-align:center;color:var(--muted);font-size:10px;margin-top:9px}
+.dashboard-page,.video-studio,.settings-page{display:none;flex:1;min-height:0;overflow-y:auto;padding:28px;animation:enter .3s ease}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dashboard-content,.video-heading,.settings-content{max-width:1050px;margin:0 auto}
+.dashboard-top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}
+.dashboard-top h1{font-size:28px;letter-spacing:-1px;margin:0 0 6px}
+.dashboard-top p{color:var(--muted);margin:0;font-size:13px}
+.dashboard-tag{font-size:10px;color:var(--green);background:var(--green-dark);padding:8px 11px;border-radius:20px}
+.dashboard-hero{padding:27px;border:1px solid var(--border);border-radius:20px;background:linear-gradient(120deg,var(--panel2),var(--panel));position:relative;overflow:hidden}
+.dashboard-hero:after{content:"S";position:absolute;right:30px;top:-35px;font-size:190px;font-weight:900;color:var(--green);opacity:.045;pointer-events:none}
+.dashboard-hero h2{font-size:24px;margin:0 0 9px;letter-spacing:-.7px}
+.dashboard-hero p{font-size:13px;color:var(--muted);max-width:500px;line-height:1.7}
+.dashboard-hero button{margin-top:10px}
+.dashboard-section-title{font-size:12px;font-weight:800;letter-spacing:1px;margin:26px 0 12px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dashboard-card{border:1px solid var(--border);background:var(--panel);border-radius:15px;padding:17px;text-align:left;color:var(--text);transition:.2s;min-height:112px}
+.dashboard-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.dashboard-card .card-icon{font-size:21px;margin-bottom:13px}
+.dashboard-card strong{display:block;font-size:13px;margin-bottom:5px}
+.dashboard-card small{font-size:11px;color:var(--muted);line-height:1.5}
+.dashboard-recent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.recent-card{display:flex;align-items:center;gap:10px;padding:13px;background:var(--panel);border:1px solid var(--border);border-radius:12px;color:var(--text);text-align:left;min-width:0}
+.recent-card:hover{border-color:var(--green)}
+.recent-card span{min-width:0}
+.recent-card strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-card small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.video-heading h1,.settings-content h1{font-size:29px;margin:0 0 8px}
+.video-heading p,.settings-content>p{color:var(--muted);line-height:1.6;font-size:13px}
+.back-chat{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:11px;margin-bottom:22px}
+.back-chat:hover{border-color:var(--green)}
+.video-note,.setting-card{margin-top:15px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:13px;color:var(--muted);font-size:12px;line-height:1.6}
+.settings-content{padding-bottom:35px}
+.settings-section-title{font-size:11px;letter-spacing:1px;color:var(--muted);font-weight:800;margin:25px 0 10px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:15px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:0}
+.setting-row strong{display:block;font-size:13px;color:var(--text)}
+.setting-row small{display:block;color:var(--muted);font-size:11px;margin-top:4px;line-height:1.5}
+.setting-control{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:9px;max-width:180px}
+.toggle{width:43px;height:24px;border:0;border-radius:20px;background:#505950;position:relative;flex-shrink:0}
+.toggle:after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s}
+.toggle.on{background:var(--green)}
+.toggle.on:after{left:22px;background:#172017}
+.danger-button{background:#3a1919;color:#ffaaaa;border:1px solid #683333;border-radius:9px;padding:10px 13px;font-size:11px}
+.primary-button{background:var(--green);color:#10160a;border:0;border-radius:9px;padding:10px 13px;font-weight:700;transition:.2s}
+.modal{position:fixed;inset:0;background:#000b;z-index:20;display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(5px)}
+.modal.show{display:flex}
+.modal-card{width:100%;max-width:430px;background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:25px;max-height:85dvh;overflow-y:auto;animation:enter .2s ease}
+.modal-card h2{margin:0 0 7px;font-size:20px}
+.modal-card p{color:var(--muted);font-size:12px;line-height:1.6}
+.modal-card input{width:100%;margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);outline:none}
+.primary{width:100%;padding:13px;margin-top:16px;border:0;border-radius:11px;background:var(--green);color:#10160a;font-weight:800}
+.modal-switch{margin-top:16px;text-align:center;color:var(--muted);font-size:12px}
+.modal-switch button{background:none;border:0;color:var(--green)}
+#authError{color:#ff8585;min-height:18px;font-size:12px}
+.prompt-list{display:flex;flex-direction:column;gap:8px;margin-top:17px}
+.prompt-item{padding:12px;border:1px solid var(--border);background:var(--panel2);border-radius:11px;color:var(--text);text-align:left;font-size:12px}
+.prompt-item:hover{border-color:var(--green)}
+.prompt-item strong{display:block;margin-bottom:4px}
+.prompt-item small{color:var(--muted)}
+.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--border);padding:11px 16px;border-radius:10px;display:none;z-index:30;font-size:12px;box-shadow:0 10px 30px #0005;max-width:90vw;text-align:center}
+.shortcut-list{display:grid;grid-template-columns:1fr auto;gap:13px;font-size:12px;margin-top:18px}
+.shortcut-list span:nth-child(even){color:var(--green);font-family:Consolas,monospace}
+.modal-close{float:right;background:transparent;border:0;color:var(--muted);font-size:20px}
+.hidden{display:none!important}
+
+/* SLXM VIDS VERSION X */
+.vids-version{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;background:var(--green-dark);color:var(--green);border:1px solid var(--border);border-radius:20px;font-size:10px;font-weight:800;letter-spacing:1px}
+.vids-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:17px;margin-top:23px;max-width:1050px;margin-left:auto;margin-right:auto}
+.vids-card{background:var(--panel);border:1px solid var(--border);border-radius:17px;padding:20px;min-width:0}
+.vids-card h2{font-size:17px;margin:0 0 7px}
+.vids-card>p{font-size:12px;color:var(--muted);line-height:1.6}
+.vids-label{display:block;font-size:11px;font-weight:800;margin:17px 0 8px}
+.vids-input,.vids-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px;outline:none}
+.vids-input:focus,.vids-select:focus{border-color:var(--green)}
+.vids-input{min-height:125px;resize:vertical;line-height:1.6}
+.vids-options{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.vids-upload{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;border:1px dashed var(--border);border-radius:11px;color:var(--muted);cursor:pointer;font-size:12px;margin-top:12px}
+.vids-upload:hover{border-color:var(--green);color:var(--green)}
+.vids-generate{width:100%;border:0;background:var(--green);color:#10160a;font-weight:900;padding:14px;border-radius:11px;margin-top:17px;transition:.2s}
+.vids-generate:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.vids-preview{min-height:310px;background:#080a08;border:1px solid var(--border);border-radius:13px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-top:15px;color:#89958b;text-align:center;padding:15px}
+.vids-preview video{width:100%;max-height:430px;display:block}
+.vids-preview-placeholder{display:flex;flex-direction:column;align-items:center;gap:12px}
+.vids-preview-placeholder strong{color:#f3f6f2;font-size:13px}
+.vids-preview-placeholder span{font-size:11px;line-height:1.6}
+.vids-status{margin-top:12px;padding:11px;border-radius:9px;background:var(--panel2);color:var(--muted);font-size:11px;line-height:1.6;min-height:40px}
+.vids-status.success{color:var(--green)}
+.vids-status.error{color:var(--danger)}
+.vids-download{display:none;margin-top:12px;padding:11px;border-radius:10px;background:var(--green);color:#10160a;text-decoration:none;text-align:center;font-weight:800;font-size:12px}
+.vids-image-preview{display:none;max-width:100%;max-height:120px;border-radius:10px;margin-top:10px}
+@media(max-width:800px){.vids-layout{grid-template-columns:1fr}}
+@media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar{width:245px}}
+@media(max-width:700px){
+.sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-105%);width:275px;box-shadow:15px 0 45px #0005}
+.sidebar.open{transform:translateX(0)}
+.mobile-menu{display:block}
+.topbar{padding:0 12px;min-height:60px}
+.top-title{font-size:13px}
+.top-subtitle{display:none}
+.top-actions{gap:5px}
+.mode-trigger{min-width:120px;padding:7px}
+.mode-trigger-text small{display:none}
+.messages{padding:19px 12px;gap:19px}
+.welcome{padding:18px 5px}
+.welcome h1{font-size:28px}
+.suggestions{grid-template-columns:1fr;gap:8px}
+.suggestion{padding:12px}
+.composer-area{padding:9px 10px 13px}
+.dashboard-page,.video-studio,.settings-page{padding:16px}
+.dashboard-top h1{font-size:23px}
+.dashboard-hero{padding:19px}
+.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.dashboard-recent{grid-template-columns:1fr}
+.setting-row{align-items:flex-start}
+}
+@media(max-width:420px){
+.dashboard-grid{grid-template-columns:1fr}
+.mode-trigger{min-width:108px}
+.mode-icon{width:26px;height:26px}
+.top-icon{width:34px;height:34px}
+.message{gap:9px}
+.message-avatar{width:29px;height:29px}
+.vids-options{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">S</div> SLXM AI</div>
+  <button class="new-chat" id="newChat">＋ <span>New chat</span></button>
+  <button class="side-button" id="dashboardButton">▦ <span>Dashboard</span></button>
+  <button class="side-button" id="videoStudioButton">🎬 <span>SLXM VIDS</span></button>
+  <button class="side-button" id="settingsButton">⚙ <span>Settings</span></button>
+  <div class="side-label">YOUR CONVERSATIONS</div>
+  <div class="sidebar-search"><span class="search-symbol">⌕</span><input id="chatSearch" placeholder="Search chats..." aria-label="Search chats"></div>
+  <div class="history" id="history"></div>
+  <div class="sidebar-bottom"><div class="user-area"><div class="user-line">
+    <div class="avatar" id="avatar">G</div>
+    <div class="user-info"><strong id="username">Guest</strong><small id="accountStatus">Not signed in</small></div>
+    <button class="logout" id="authButton">Log in</button>
+  </div></div></div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="top-left">
+    <button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
+    <div><div class="top-title" id="pageTitle">SLXM AI</div><div class="top-subtitle" id="pageSubtitle">Your personal AI workspace</div></div>
+  </div>
+  <div class="top-actions">
+    <button class="top-icon" id="shortcutsButton" title="Keyboard shortcuts">⌨</button>
+    <div class="mode-picker" id="modePicker">
+      <button class="mode-trigger" id="modeTrigger" type="button" aria-expanded="false">
+        <span class="mode-trigger-left"><span class="mode-icon" id="selectedModeIcon">✦</span>
+        <span class="mode-trigger-text"><strong id="selectedModeName">Chat</strong><small id="selectedModeDescription">Everyday AI</small></span></span><span class="mode-chevron">⌄</span>
+      </button>
+      <div class="mode-menu" id="modeMenu">
+        <button class="mode-option active" data-mode="chat"><span class="option-icon">✦</span><span class="option-info"><strong>Chat</strong><small>Everyday conversations</small></span><span class="option-check">✓</span></button>
+        <button class="mode-option" data-mode="lite"><span class="option-icon">⚡</span><span class="option-info"><strong>Lite</strong><small>Quick responses</small></span><span class="option-check">✓</span></button>
+        <button class="mode-option" data-mode="reason"><span class="option-icon">🧠</span><span class="option-info"><strong>Reason</strong><small>Detailed thinking</small></span><span class="option-check">✓</span></button>
+        <button class="mode-option" data-mode="vision"><span class="option-icon">👁</span><span class="option-info"><strong>Vision</strong><small>Image understanding</small></span><span class="option-check">✓</span></button>
+      </div>
+    </div>
+    <select class="hidden-model-select" id="model"><option value="chat">Chat</option><option value="lite">Lite</option><option value="reason">Reason</option><option value="vision">Vision</option></select>
+  </div>
+</header>
+
+<section class="messages" id="messages">
+  <div class="welcome"><div class="welcome-logo">S</div><div class="welcome-kicker">YOUR PERSONAL AI</div>
+    <h1>What can I help with?</h1><p>Think bigger. Create more. Get things done with SLXM AI.</p>
+    <div class="suggestions">
+      <button class="suggestion" data-prompt="Explain a difficult topic to me in simple words."><strong>📚 Learn something</strong><small>Make complicated topics simple</small></button>
+      <button class="suggestion" data-prompt="Help me write a professional email."><strong>✍️ Write something</strong><small>Emails, letters and documents</small></button>
+      <button class="suggestion" data-prompt="Give me five creative business ideas."><strong>💡 Explore ideas</strong><small>Discover new possibilities</small></button>
+      <button class="suggestion" data-prompt="Create a step-by-step plan to help me achieve my goal."><strong>🚀 Make a plan</strong><small>Turn your goals into actions</small></button>
+    </div>
+  </div>
+</section>
+
+<section class="dashboard-page" id="dashboardPage"><div class="dashboard-content">
+  <div class="dashboard-top"><div><h1>Your workspace</h1><p>Everything you need to get started with SLXM AI.</p></div><span class="dashboard-tag">✦ SLXM AI</span></div>
+  <div class="dashboard-hero"><h2>Welcome to your AI workspace.</h2><p>Ask questions, create content, explore ideas and make progress. Your AI tools are all in one place.</p><button class="primary-button" id="dashboardNewChat">＋ Start a conversation</button></div>
+  <div class="dashboard-section-title">QUICK ACCESS</div>
+  <div class="dashboard-grid">
+    <button class="dashboard-card" id="dashChat"><div class="card-icon">✦</div><strong>AI Chat</strong><small>Ask anything and get helpful answers.</small></button>
+    <button class="dashboard-card" id="dashVideo"><div class="card-icon">🎬</div><strong>SLXM VIDS</strong><small>Create videos inside SLXM AI.</small></button>
+    <button class="dashboard-card" id="dashPrompts"><div class="card-icon">✍️</div><strong>Prompt Library</strong><small>Find prompts to get started faster.</small></button>
+    <button class="dashboard-card" id="dashVision"><div class="card-icon">👁</div><strong>Vision AI</strong><small>Upload an image and ask questions.</small></button>
+    <button class="dashboard-card" id="dashSettings"><div class="card-icon">⚙</div><strong>Settings</strong><small>Customise your SLXM experience.</small></button>
+    <button class="dashboard-card" id="dashShortcuts"><div class="card-icon">⌨</div><strong>Keyboard shortcuts</strong><small>Learn quicker ways to use SLXM.</small></button>
+  </div>
+  <div class="dashboard-section-title">RECENT CONVERSATIONS</div><div class="dashboard-recent" id="dashboardRecent"></div>
+</div></section>
+
+<!-- SLXM VIDS VERSION X -->
+<section class="video-studio" id="videoStudio">
+  <div class="video-heading">
+    <button class="back-chat" id="backToChat">← Back to Chat</button>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+      <h1 style="margin:0">🎬 SLXM VIDS</h1>
+      <span class="vids-version">VERSION X</span>
+    </div>
+    <p>Your AI video creation studio. Turn your ideas into videos without leaving SLXM AI.</p>
+  </div>
+  <div class="vids-layout">
+    <div class="vids-card">
+      <h2>✨ Create your video</h2>
+      <p>Describe the video you want SLXM VIDS to create.</p>
+      <label class="vids-label" for="vidsPrompt">Video description</label>
+      <textarea class="vids-input" id="vidsPrompt" placeholder="Example: A cinematic sports car driving through a futuristic city at night, realistic lighting, smooth camera movement..."></textarea>
+      <div class="vids-options">
+        <div><label class="vids-label" for="vidsMode">Creation mode</label><select class="vids-select" id="vidsMode"><option value="text-to-video">Text to video</option><option value="image-to-video">Image to video</option></select></div>
+        <div><label class="vids-label" for="vidsRatio">Aspect ratio</label><select class="vids-select" id="vidsRatio"><option value="16:9">Landscape (16:9)</option><option value="9:16">Portrait (9:16)</option><option value="1:1">Square (1:1)</option></select></div>
+        <div><label class="vids-label" for="vidsDuration">Duration</label><select class="vids-select" id="vidsDuration"><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option></select></div>
+        <div><label class="vids-label" for="vidsQuality">Quality</label><select class="vids-select" id="vidsQuality"><option value="standard">Standard</option><option value="high">High</option></select></div>
+      </div>
+      <label class="vids-upload" for="vidsImage">🖼 Upload an image (optional)</label>
+      <input type="file" id="vidsImage" accept="image/*" hidden>
+      <img id="vidsImagePreview" class="vids-image-preview" alt="Uploaded image preview">
+      <button class="vids-generate" id="vidsGenerate">✨ Generate Video</button>
+      <div class="vids-status" id="vidsStatus">Your video will appear in the preview area.</div>
+    </div>
+    <div class="vids-card">
+      <h2>🎞 Your video</h2>
+      <p>Preview your creation here.</p>
+      <div class="vids-preview" id="vidsPreview">
+        <div class="vids-preview-placeholder">
+          <div style="font-size:45px">🎬</div>
+          <strong>Your video will appear here</strong>
+          <span>Create a video to see your result inside SLXM VIDS.</span>
+        </div>
+      </div>
+      <a id="vidsDownload" class="vids-download" download="slxm-video.mp4">↓ Download video</a>
+    </div>
+  </div>
+  <div class="video-note">
+    <strong>SLXM VIDS · VERSION X</strong><br>
+    Built-in video studio. Video generation needs a connected video-generation API on your SLXM server.
+  </div>
+</section>
+
+<section class="settings-page" id="settingsPage"><div class="settings-content">
+  <button class="back-chat" id="settingsBack">← Back to Chat</button>
+  <h1>⚙ Settings</h1><p>Personalise your SLXM AI experience.</p>
+  <div class="settings-section-title">APPEARANCE</div>
+  <div class="setting-card">
+    <div class="setting-row"><div><strong>Theme</strong><small>Choose how SLXM AI looks.</small></div><select class="setting-control" id="themeSetting"><option value="dark">Dark</option><option value="light">Light</option></select></div>
+    <div class="setting-row"><div><strong>Text size</strong><small>Adjust the size of chat messages.</small></div><select class="setting-control" id="fontSizeSetting"><option value="13px">Small</option><option value="15px">Normal</option><option value="17px">Large</option><option value="19px">Extra large</option></select></div>
+  </div>
+  <div class="settings-section-title">CHAT PREFERENCES</div>
+  <div class="setting-card">
+    <div class="setting-row"><div><strong>Default AI mode</strong><small>Choose the mode selected when SLXM opens.</small></div><select class="setting-control" id="defaultModeSetting"><option value="chat">Chat</option><option value="lite">Lite</option><option value="reason">Reason</option><option value="vision">Vision</option></select></div>
+    <div class="setting-row"><div><strong>Enter to send</strong><small>Press Enter to send. Turn off to use Ctrl + Enter instead.</small></div><button class="toggle on" id="enterSendSetting" aria-label="Toggle Enter to send"></button></div>
+  </div>
+  <div class="settings-section-title">CHAT HISTORY</div>
+  <div class="setting-card">
+    <div class="setting-row"><div><strong>Export current chat</strong><small>Save the conversation as a text file.</small></div><button class="primary-button" id="exportCurrent">Export</button></div>
+    <div class="setting-row"><div><strong>Delete all chats</strong><small>Permanently delete all chats from this account or guest session.</small></div><button class="danger-button" id="deleteAllChats">Delete all</button></div>
+  </div>
+  <div class="settings-section-title">ABOUT</div>
+  <div class="setting-card"><div class="setting-row"><div><strong>SLXM AI</strong><small>Your personal AI assistant · Version 2.3</small></div><span>✦</span></div></div>
+</div></section>
+
+<div class="composer-area" id="composerArea"><div class="composer-wrap">
+  <div id="imagePreview"></div>
+  <div class="composer">
+    <div class="composer-tools"><button class="attach-button" id="attach" title="Attach image">＋</button><input type="file" id="imageInput" accept="image/*" hidden><button class="prompt-library-button" id="promptLibraryButton" title="Prompt library">▤</button></div>
+    <textarea id="prompt" rows="1" placeholder="Message SLXM AI..." aria-label="Message SLXM AI"></textarea>
+    <button class="send-button" id="send" title="Send message">↑</button>
+  </div>
+  <div class="disclaimer">SLXM AI can make mistakes. Check important information.</div>
+</div></div>
+</main></div>
+
+<div class="modal" id="authModal"><div class="modal-card">
+  <h2 id="authTitle">Welcome back</h2><p id="authDescription">Log in to your SLXM AI account.</p>
+  <form id="authForm">
+    <input id="authUsername" placeholder="Username" autocomplete="username" style="display:none">
+    <input id="authEmail" type="email" placeholder="Email address" required autocomplete="email">
+    <input id="authPassword" type="password" placeholder="Password" required autocomplete="current-password">
+    <button class="primary" id="authSubmit" type="submit">Log in</button>
+  </form>
+  <div id="authError"></div>
+  <div class="modal-switch"><span id="switchText">Don't have an account?</span><button id="switchAuth" type="button">Sign up</button></div>
+  <div class="modal-switch"><button id="closeAuth" type="button">Close</button></div>
+</div></div>
+
+<div class="modal" id="promptModal"><div class="modal-card">
+  <button class="modal-close" id="closePrompts">×</button><h2>✍️ Prompt Library</h2><p>Choose a prompt to add it to your message box.</p>
+  <div class="prompt-list">
+    <button class="prompt-item" data-prompt="Explain this topic in simple words, using examples and a short summary."><strong>📚 Simple explanation</strong><small>Understand difficult topics easily.</small></button>
+    <button class="prompt-item" data-prompt="Write a professional, friendly email about the following: "><strong>✉️ Professional email</strong><small>Write a clear and polite email.</small></button>
+    <button class="prompt-item" data-prompt="Act as a creative brainstorming partner. Give me 10 original ideas for: "><strong>💡 Brainstorm ideas</strong><small>Generate fresh ideas.</small></button>
+    <button class="prompt-item" data-prompt="Create a detailed step-by-step plan for this goal: "><strong>🚀 Step-by-step plan</strong><small>Break a goal into manageable steps.</small></button>
+    <button class="prompt-item" data-prompt="Summarise the following text into clear bullet points, keeping the important details: "><strong>📝 Summarise text</strong><small>Turn long text into useful notes.</small></button>
+    <button class="prompt-item" data-prompt="Act as a patient tutor. Teach me this subject step by step and ask me questions to check my understanding: "><strong>🎓 Study tutor</strong><small>Learn and practise a subject.</small></button>
+    <button class="prompt-item" data-prompt="Review this writing and improve its clarity, grammar and professionalism while keeping the original meaning: "><strong>✨ Improve writing</strong><small>Polish your writing.</small></button>
+    <button class="prompt-item" data-prompt="Give me a balanced analysis of this idea, including advantages, disadvantages and possible improvements: "><strong>⚖️ Analyse an idea</strong><small>Explore both sides of an idea.</small></button>
+  </div>
+</div></div>
+
+<div class="modal" id="shortcutsModal"><div class="modal-card">
+  <button class="modal-close" id="closeShortcuts">×</button><h2>⌨ Keyboard shortcuts</h2><p>Use these shortcuts to move around SLXM faster.</p>
+  <div class="shortcut-list">
+    <span>New chat</span><span>Ctrl + Shift + O</span><span>Search chats</span><span>Ctrl + K</span>
+    <span>Prompt library</span><span>Ctrl + P</span><span>Keyboard shortcuts</span><span>Ctrl + /</span>
+    <span>Send message</span><span>Enter</span><span>New line</span><span>Shift + Enter</span><span>Close popup</span><span>Escape</span>
+  </div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const promptBox=$("prompt"),sendButton=$("send"),messagesBox=$("messages"),modelSelect=$("model");
+let conversations=[],currentChat=null,currentUser=null,busy=false;
+let attachedImage=null,authMode="login",currentPage="chat";
+let settings={theme:"dark",defaultMode:"chat",enterToSend:true,fontSize:"15px"};
+let chatFilter="";
+
+function toast(message){
+  const el=$("toast");el.textContent=message;el.style.display="block";
+  clearTimeout(window.slxmToastTimer);
+  window.slxmToastTimer=setTimeout(()=>el.style.display="none",2500);
+}
+function scrollChatToBottom(){requestAnimationFrame(()=>messagesBox.scrollTo({top:messagesBox.scrollHeight,behavior:"smooth"}))}
+function makeId(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function resizePrompt(){promptBox.style.height="auto";promptBox.style.height=Math.min(promptBox.scrollHeight,180)+"px"}
+
+function loadSettings(){
+  try{const saved=JSON.parse(localStorage.getItem("slxm-settings-v1")||"{}");settings={...settings,...saved}}catch(e){}
+  if(!["dark","light"].includes(settings.theme))settings.theme="dark";
+  if(!["chat","lite","reason","vision"].includes(settings.defaultMode))settings.defaultMode="chat";
+  if(!["13px","15px","17px","19px"].includes(settings.fontSize))settings.fontSize="15px";
+  applySettings();
+}
+function applySettings(){
+  document.body.classList.toggle("light",settings.theme==="light");
+  document.documentElement.style.setProperty("--font-size",settings.fontSize);
+  $("themeSetting").value=settings.theme;
+  $("defaultModeSetting").value=settings.defaultMode;
+  $("fontSizeSetting").value=settings.fontSize;
+  $("enterSendSetting").classList.toggle("on",settings.enterToSend);
+}
+function saveSettings(){localStorage.setItem("slxm-settings-v1",JSON.stringify(settings))}
+$("themeSetting").addEventListener("change",e=>{settings.theme=e.target.value;applySettings();saveSettings();toast("Theme updated.")});
+$("defaultModeSetting").addEventListener("change",e=>{settings.defaultMode=e.target.value;saveSettings();toast("Default AI mode saved.")});
+$("fontSizeSetting").addEventListener("change",e=>{settings.fontSize=e.target.value;applySettings();saveSettings();toast("Text size updated.")});
+$("enterSendSetting").addEventListener("click",()=>{settings.enterToSend=!settings.enterToSend;applySettings();saveSettings();toast(settings.enterToSend?"Enter to send enabled.":"Ctrl + Enter to send enabled.")});
+
+const modeDetails={chat:{name:"Chat",description:"Everyday AI",icon:"✦"},lite:{name:"Lite",description:"Quick responses",icon:"⚡"},reason:{name:"Reason",description:"Detailed thinking",icon:"🧠"},vision:{name:"Vision",description:"Image understanding",icon:"👁"}};
+const modePicker=$("modePicker"),modeTrigger=$("modeTrigger");
+function closeModeMenu(){modePicker.classList.remove("open");modeTrigger.setAttribute("aria-expanded","false")}
+function setMode(mode,showToast=false){
+  const d=modeDetails[mode];if(!d)return;
+  modelSelect.value=mode;
+  $("selectedModeName").textContent=d.name;
+  $("selectedModeDescription").textContent=d.description;
+  $("selectedModeIcon").textContent=d.icon;
+  document.querySelectorAll(".mode-option").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+  closeModeMenu();
+  if(showToast)toast(d.name+" mode selected");
+}
+modeTrigger.addEventListener("click",()=>{const open=modePicker.classList.toggle("open");modeTrigger.setAttribute("aria-expanded",String(open))});
+document.querySelectorAll(".mode-option").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode,true)));
+document.addEventListener("click",e=>{if(!modePicker.contains(e.target))closeModeMenu()});
+
+const videoStudio=$("videoStudio"),settingsPage=$("settingsPage"),dashboardPage=$("dashboardPage"),composerArea=$("composerArea");
+function showPage(page){
+  currentPage=page;
+  messagesBox.style.display=page==="chat"?"flex":"none";
+  dashboardPage.style.display=page==="dashboard"?"block":"none";
+  videoStudio.style.display=page==="video"?"block":"none";
+  settingsPage.style.display=page==="settings"?"block":"none";
+  composerArea.style.display=page==="chat"?"block":"none";
+  $("pageTitle").textContent=page==="chat"?"SLXM AI":page==="dashboard"?"Dashboard":page==="video"?"SLXM VIDS":"Settings";
+  $("pageSubtitle").textContent=page==="chat"?"Your personal AI workspace":page==="dashboard"?"Your AI workspace":page==="video"?"Your video creation studio":"Personalise your experience";
+  $("sidebar").classList.remove("open");
+  closeModeMenu();
+  if(page==="dashboard")renderDashboardRecent();
+}
+function openVideoStudio(){showPage("video")}
+function closeVideoStudio(){showPage("chat")}
+$("dashboardButton").addEventListener("click",()=>showPage("dashboard"));
+$("videoStudioButton").addEventListener("click",openVideoStudio);
+$("backToChat").addEventListener("click",closeVideoStudio);
+$("settingsButton").addEventListener("click",()=>showPage("settings"));
+$("settingsBack").addEventListener("click",closeVideoStudio);
+
+/* SLXM VIDS VERSION X */
+let vidsImageData=null;
+const vidsGenerate=$("vidsGenerate");
+const vidsStatus=$("vidsStatus");
+const vidsPreview=$("vidsPreview");
+const vidsDownload=$("vidsDownload");
+
+$("vidsImage").addEventListener("change",event=>{
+  const file=event.target.files[0];
+  if(!file)return;
+  if(!file.type.startsWith("image/")){toast("Please select an image.");return}
+  if(file.size>5*1024*1024){toast("Image must be smaller than 5MB.");event.target.value="";return}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    vidsImageData=reader.result;
+    $("vidsImagePreview").src=vidsImageData;
+    $("vidsImagePreview").style.display="block";
+    toast("Image added to SLXM VIDS.");
+  };
+  reader.readAsDataURL(file);
+});
+
+$("vidsMode").addEventListener("change",event=>{
+  if(event.target.value==="image-to-video"&&!vidsImageData){
+    toast("Upload an image to use image-to-video.");
+  }
+});
+
+function setVidsStatus(message,type=""){
+  vidsStatus.textContent=message;
+  vidsStatus.className="vids-status "+type;
+}
+
+vidsGenerate.addEventListener("click",async()=>{
+  const prompt=$("vidsPrompt").value.trim();
+  const mode=$("vidsMode").value;
+
+  if(!prompt){
+    toast("Please describe the video you want.");
+    $("vidsPrompt").focus();
+    return;
+  }
+  if(mode==="image-to-video"&&!vidsImageData){
+    toast("Please upload an image first.");
+    return;
+  }
+
+  vidsGenerate.disabled=true;
+  vidsGenerate.textContent="⏳ Creating your video...";
+  setVidsStatus("Connecting to the SLXM video engine...");
+  vidsDownload.style.display="none";
+
+  try{
+    const response=await fetch("/api/video/generate",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"same-origin",
+      body:JSON.stringify({
+        prompt,
+        mode,
+        aspectRatio:$("vidsRatio").value,
+        duration:Number($("vidsDuration").value),
+        quality:$("vidsQuality").value,
+        image:vidsImageData
+      })
+    });
+
+    const data=await response.json().catch(()=>({}));
+
+    if(!response.ok){
+      throw new Error(data.error||data.message||"The video engine is not connected yet.");
+    }
+    if(!data.videoUrl){
+      throw new Error(data.message||"The server did not return a video.");
+    }
+
+    const video=document.createElement("video");
+    video.controls=true;
+    video.playsInline=true;
+    video.src=data.videoUrl;
+
+    vidsPreview.innerHTML="";
+    vidsPreview.appendChild(video);
+    vidsDownload.href=data.videoUrl;
+    vidsDownload.style.display="block";
+
+    setVidsStatus("Your video has been created successfully!","success");
+    toast("SLXM VIDS: Video created!");
+
+  }catch(error){
+    console.error("SLXM VIDS:",error);
+    setVidsStatus("Video generation is not connected yet. "+error.message,"error");
+  }finally{
+    vidsGenerate.disabled=false;
+    vidsGenerate.textContent="✨ Generate Video";
+  }
+});
+
+/* CHAT SYSTEM */
+function newConversation(){
+  currentChat={id:makeId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false};
+  conversations.unshift(currentChat);
+  renderHistory();
+  renderMessages(true);
+  showPage("chat");
+  promptBox.focus();
+}
+function saveLocal(){
+  try{localStorage.setItem("slxm-guest-chats-v1",JSON.stringify(conversations))}
+  catch(e){console.warn(e)}
+}
+async function saveCloud(){
+  if(!currentUser)return;
+  try{
+    const r=await fetch("/api/chats",{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      credentials:"same-origin",
+      body:JSON.stringify({chats:conversations})
+    });
+    if(!r.ok)console.warn("Cloud chat save failed:",await r.text());
+  }catch(e){console.warn("Cloud save failed",e)}
+}
+async function persistChats(){saveLocal();await saveCloud()}
+
+async function loadChats(){
+  try{
+    if(currentUser){
+      const r=await fetch("/api/chats",{credentials:"same-origin"});
+      if(r.ok){
+        const data=await r.json();
+        conversations=Array.isArray(data.chats)?data.chats:[];
+      }
+    }else{
+      const saved=localStorage.getItem("slxm-guest-chats-v1");
+      conversations=saved?JSON.parse(saved):[];
+    }
+  }catch(e){
+    console.warn("Chat history could not be loaded",e);
+    conversations=[];
+  }
+  if(!Array.isArray(conversations))conversations=[];
+  conversations.forEach(c=>{if(typeof c.pinned!=="boolean")c.pinned=false});
+  conversations.sort((a,b)=>(Number(b.pinned)-Number(a.pinned))||(b.updatedAt||0)-(a.updatedAt||0));
+  currentChat=conversations[0]||null;
+  renderHistory();
+  renderMessages(true);
+}
+function renderHistory(){
+  const history=$("history");
+  history.innerHTML="";
+  let filtered=conversations.filter(chat=>(chat.title||"New chat").toLowerCase().includes(chatFilter.toLowerCase()));
+  filtered.sort((a,b)=>(Number(b.pinned)-Number(a.pinned))||((b.updatedAt||0)-(a.updatedAt||0)));
+
+  if(!filtered.length){
+    const empty=document.createElement("div");
+    empty.className="empty-history";
+    empty.textContent=chatFilter?"No matching chats.":"Your conversations will appear here.";
+    history.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(chat=>{
+    const row=document.createElement("div");
+    row.className="history-row";
+
+    const button=document.createElement("button");
+    button.className="history-item"+(currentChat?.id===chat.id?" active":"");
+    button.title=chat.title||"New chat";
+
+    if(chat.pinned){
+      const pin=document.createElement("span");
+      pin.className="pin-mark";
+      pin.textContent="◆";
+      button.appendChild(pin);
+    }
+
+    button.appendChild(document.createTextNode(chat.title||"New chat"));
+    button.addEventListener("click",()=>{
+      currentChat=chat;
+      showPage("chat");
+      renderMessages(true);
+      renderHistory();
+    });
+
+    const actions=document.createElement("div");
+    actions.className="chat-actions";
+
+    const pin=document.createElement("button");
+    pin.type="button";
+    pin.title=chat.pinned?"Unpin chat":"Pin chat";
+    pin.textContent=chat.pinned?"◆":"◇";
+    pin.addEventListener("click",async()=>{
+      chat.pinned=!chat.pinned;
+      chat.updatedAt=Date.now();
+      await persistChats();
+      renderHistory();
+      toast(chat.pinned?"Chat pinned.":"Chat unpinned.");
+    });
+
+    const rename=document.createElement("button");
+    rename.type="button";
+    rename.title="Rename chat";
+    rename.textContent="✎";
+    rename.addEventListener("click",async()=>{
+      const name=prompt("Enter a new name for this chat:",chat.title||"New chat");
+      if(name===null)return;
+      const clean=name.trim();
+      if(!clean){toast("Chat name cannot be empty.");return}
+      chat.title=clean;
+      chat.updatedAt=Date.now();
+      await persistChats();
+      renderHistory();
+      renderDashboardRecent();
+      toast("Chat renamed.");
+    });
+
+    const del=document.createElement("button");
+    del.type="button";
+    del.title="Delete chat";
+    del.textContent="×";
+    del.addEventListener("click",async()=>{
+      if(!confirm('Delete "'+(chat.title||"New chat")+'"? This cannot be undone.'))return;
+      conversations=conversations.filter(c=>c.id!==chat.id);
+      if(currentChat?.id===chat.id)currentChat=conversations[0]||null;
+      await persistChats();
+      renderHistory();
+      renderMessages(true);
+      renderDashboardRecent();
+      toast("Chat deleted.");
+    });
+
+    actions.append(pin,rename,del);
+    row.append(button,actions);
+    history.appendChild(row);
+  });
+}
+$("chatSearch").addEventListener("input",e=>{
+  chatFilter=e.target.value.trim();
+  renderHistory();
+});
+
+async function deleteAllChats(){
+  if(!conversations.length){toast("There are no chats to delete.");return}
+  if(!confirm("Delete ALL your chats? This cannot be undone."))return;
+  conversations=[];
+  currentChat=null;
+  await persistChats();
+  renderHistory();
+  renderMessages(true);
+  renderDashboardRecent();
+  toast("All chats deleted.");
+}
+$("deleteAllChats").addEventListener("click",deleteAllChats);
+
+function renderDashboardRecent(){
+  const area=$("dashboardRecent");
+  area.innerHTML="";
+  const recent=conversations.slice(0,6);
+  if(!recent.length){
+    const p=document.createElement("p");
+    p.textContent="No conversations yet. Start your first chat!";
+    p.style.color="var(--muted)";
+    p.style.fontSize="12px";
+    area.appendChild(p);
+    return;
+  }
+  recent.forEach(chat=>{
+    const button=document.createElement("button");
+    button.className="recent-card";
+    const icon=document.createElement("span");
+    icon.textContent=chat.pinned?"◆":"◷";
+    icon.style.color="var(--green)";
+    const details=document.createElement("span");
+    const title=document.createElement("strong");
+    title.textContent=chat.title||"New chat";
+    const small=document.createElement("small");
+    small.textContent=(chat.messages?.length||0)+" messages";
+    details.append(title,small);
+    button.append(icon,details);
+    button.addEventListener("click",()=>{
+      currentChat=chat;
+      showPage("chat");
+      renderMessages(true);
+      renderHistory();
+    });
+    area.appendChild(button);
+  });
+}
+
+$("dashboardNewChat").addEventListener("click",newConversation);
+$("dashChat").addEventListener("click",()=>showPage("chat"));
+$("dashVideo").addEventListener("click",openVideoStudio);
+$("dashPrompts").addEventListener("click",openPromptLibrary);
+$("dashSettings").addEventListener("click",()=>showPage("settings"));
+$("dashShortcuts").addEventListener("click",openShortcuts);
+$("dashVision").addEventListener("click",()=>{
+  showPage("chat");
+  setMode("vision",false);
+  $("imageInput").click();
+});
+
+function renderMessages(shouldScroll=false){
+  messagesBox.innerHTML="";
+  if(!currentChat||!currentChat.messages||!currentChat.messages.length){
+    const welcome=document.createElement("div");
+    welcome.className="welcome";
+    welcome.innerHTML=`<div class="welcome-logo">S</div><div class="welcome-kicker">YOUR PERSONAL AI</div><h1>What can I help with?</h1><p>Think bigger. Create more. Get things done with SLXM AI.</p><div class="suggestions"><button class="suggestion" data-prompt="Explain a difficult topic to me in simple words."><strong>📚 Learn something</strong><small>Make complicated topics simple</small></button><button class="suggestion" data-prompt="Help me write a professional email."><strong>✍️ Write something</strong><small>Emails, letters and documents</small></button><button class="suggestion" data-prompt="Give me five creative business ideas."><strong>💡 Explore ideas</strong><small>Discover new possibilities</small></button><button class="suggestion" data-prompt="Create a step-by-step plan to help me achieve my goal."><strong>🚀 Make a plan</strong><small>Turn your goals into actions</small></button></div>`;
+    messagesBox.appendChild(welcome);
+    welcome.querySelectorAll("[data-prompt]").forEach(b=>b.addEventListener("click",()=>{
+      promptBox.value=b.dataset.prompt;
+      promptBox.focus();
+      resizePrompt();
+    }));
+    return;
+  }
+  currentChat.messages.forEach((m,index)=>addMessageToScreen(m.role,m.content,index));
+  if(shouldScroll)scrollChatToBottom();
+}
+
+function addMessageToScreen(role,content,index){
+  const row=document.createElement("div");
+  row.className="message "+role;
+  const avatar=document.createElement("div");
+  avatar.className="message-avatar";
+  avatar.textContent=role==="user"?"Y":"S";
+  const body=document.createElement("div");
+  body.className="message-content";
+  const name=document.createElement("div");
+  name.className="message-name";
+  name.textContent=role==="user"?"You":"SLXM AI";
+  const text=document.createElement("div");
+  text.className="message-text";
+  text.textContent=content||"";
+  body.append(name,text);
+
+  if(role==="assistant"){
+    const tools=document.createElement("div");
+    tools.className="message-tools";
+    const copy=document.createElement("button");
+    copy.className="message-tool";
+    copy.textContent="▣ Copy";
+    copy.addEventListener("click",async()=>{
+      try{
+        await navigator.clipboard.writeText(content||"");
+        toast("Response copied.");
+      }catch(e){
+        const area=document.createElement("textarea");
+        area.value=content||"";
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        toast("Response copied.");
+      }
+    });
+    tools.appendChild(copy);
+    const lastAssistant=currentChat?.messages?.[index]?.role==="assistant"&&index===currentChat.messages.length-1;
+    if(lastAssistant){
+      const regenerate=document.createElement("button");
+      regenerate.className="message-tool";
+      regenerate.textContent="↻ Regenerate";
+      regenerate.addEventListener("click",()=>regenerateLastResponse());
+      tools.appendChild(regenerate);
+    }
+    body.appendChild(tools);
+  }
+  row.append(avatar,body);
+  messagesBox.appendChild(row);
+  return text;
+}
+
+function showTyping(){
+  const row=document.createElement("div");
+  row.className="message";
+  row.id="typing";
+  row.innerHTML=`<div class="message-avatar">S</div><div class="message-content"><div class="message-name">SLXM AI</div><div class="typing">Thinking <span class="typing-dots"><i></i><i></i><i></i></span></div></div>`;
+  messagesBox.appendChild(row);
+  scrollChatToBottom();
+}
+
+async function requestAI(chat){
+  if(busy)return;
+  busy=true;
+  sendButton.disabled=true;
+  showTyping();
+  try{
+    const payload={
+      messages:chat.messages.map(m=>({role:m.role,content:m.content,...(m.image?{image:m.image}:{})})),
+      mode:modelSelect.value
+    };
+    const response=await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"same-origin",
+      body:JSON.stringify(payload)
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error||data.message||"Server error ("+response.status+")");
+    const reply=data.message?.content||data.reply||data.content||data.choices?.[0]?.message?.content;
+    if(!reply)throw new Error("The server returned an empty reply. Check server-new.js.");
+    chat.messages.push({role:"assistant",content:reply});
+    chat.updatedAt=Date.now();
+    $("typing")?.remove();
+    if(currentChat?.id===chat.id)renderMessages(true);
+    await persistChats();
+    renderHistory();
+    renderDashboardRecent();
+  }catch(error){
+    $("typing")?.remove();
+    if(currentChat?.id===chat.id){
+      addMessageToScreen("assistant","Sorry, something went wrong: "+error.message);
+      scrollChatToBottom();
+    }
+    console.error(error);
+  }finally{
+    busy=false;
+    sendButton.disabled=false;
+    promptBox.focus();
+  }
+}
+
+async function sendMessage(){
+  const text=promptBox.value.trim();
+  if((!text&&!attachedImage)||busy)return;
+  if(!currentChat)newConversation();
+  const chatAtStart=currentChat;
+  const userMessage={role:"user",content:text||(attachedImage?"Please describe this image.":"")};
+  if(attachedImage)userMessage.image=attachedImage;
+  chatAtStart.messages.push(userMessage);
+  if(chatAtStart.messages.length===1)chatAtStart.title=text.slice(0,38)||"Image conversation";
+  chatAtStart.updatedAt=Date.now();
+  promptBox.value="";
+  resizePrompt();
+  clearImage();
+  renderMessages(true);
+  await persistChats();
+  renderHistory();
+  renderDashboardRecent();
+  await requestAI(chatAtStart);
+}
+
+async function regenerateLastResponse(){
+  if(busy||!currentChat||!currentChat.messages.length)return;
+  const last=currentChat.messages[currentChat.messages.length-1];
+  if(last.role!=="assistant"){
+    toast("There is no response to regenerate.");
+    return;
+  }
+  currentChat.messages.pop();
+  await persistChats();
+  renderMessages(true);
+  await requestAI(currentChat);
+}
+
+function clearImage(){
+  attachedImage=null;
+  $("imageInput").value="";
+  $("imagePreview").style.display="none";
+  $("imagePreview").innerHTML="";
+}
+$("attach").addEventListener("click",()=>$("imageInput").click());
+$("imageInput").addEventListener("change",event=>{
+  const file=event.target.files[0];
+  if(!file)return;
+  if(!file.type.startsWith("image/")){
+    toast("Please select an image.");
+    event.target.value="";
+    return;
+  }
+  if(file.size>5*1024*1024){
+    toast("Image must be smaller than 5MB.");
+    event.target.value="";
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=()=>{
+    attachedImage=reader.result;
+    $("imagePreview").innerHTML="";
+    const img=document.createElement("img");
+    img.src=attachedImage;
+    const label=document.createElement("span");
+    label.textContent=file.name;
+    label.style.fontSize="11px";
+    label.style.color="var(--muted)";
+    const remove=document.createElement("button");
+    remove.textContent="Remove";
+    remove.onclick=clearImage;
+    $("imagePreview").append(img,label,remove);
+    $("imagePreview").style.display="flex";
+  };
+  reader.readAsDataURL(file);
+});
+
+function openPromptLibrary(){$("promptModal").classList.add("show")}
+function closePromptLibrary(){$("promptModal").classList.remove("show")}
+$("promptLibraryButton").addEventListener("click",openPromptLibrary);
+$("closePrompts").addEventListener("click",closePromptLibrary);
+$("promptModal").addEventListener("click",e=>{
+  if(e.target===$("promptModal"))closePromptLibrary();
+});
+document.querySelectorAll(".prompt-item").forEach(button=>button.addEventListener("click",()=>{
+  promptBox.value=button.dataset.prompt;
+  resizePrompt();
+  promptBox.focus();
+  closePromptLibrary();
+  showPage("chat");
+}));
+
+function exportChat(chat){
+  if(!chat||!chat.messages?.length){
+    toast("There is no conversation to export.");
+    return;
+  }
+  const lines=["SLXM AI - "+(chat.title||"Conversation"),"Exported: "+new Date().toLocaleString(),"",...chat.messages.map(m=>(m.role==="user"?"YOU":"SLXM AI")+":\n"+(m.content||"")+"\n")];
+  const blob=new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=(chat.title||"slxm-chat").replace(/[^a-z0-9-_]/gi,"_")+".txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("Chat exported.");
+}
+$("exportCurrent").addEventListener("click",()=>exportChat(currentChat));
+sendButton.addEventListener("click",sendMessage);
+promptBox.addEventListener("input",resizePrompt);
+promptBox.addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey&&settings.enterToSend){
+    e.preventDefault();
+    sendMessage();
+  }
+  if(e.key==="Enter"&&e.ctrlKey&&!settings.enterToSend){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+$("newChat").addEventListener("click",()=>{
+  showPage("chat");
+  newConversation();
+});
+$("mobileMenu").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+
+function openShortcuts(){$("shortcutsModal").classList.add("show")}
+$("shortcutsButton").addEventListener("click",openShortcuts);
+$("closeShortcuts").addEventListener("click",()=>$("shortcutsModal").classList.remove("show"));
+$("shortcutsModal").addEventListener("click",e=>{
+  if(e.target===$("shortcutsModal"))$("shortcutsModal").classList.remove("show");
+});
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){
+    closeModeMenu();
+    $("promptModal").classList.remove("show");
+    $("shortcutsModal").classList.remove("show");
+    $("authModal").classList.remove("show");
+    $("sidebar").classList.remove("open");
+  }
+  if(e.ctrlKey&&e.key.toLowerCase()==="k"){
+    e.preventDefault();
+    showPage("chat");
+    $("chatSearch").focus();
+  }
+  if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==="o"){
+    e.preventDefault();
+    showPage("chat");
+    newConversation();
+  }
+  if(e.ctrlKey&&e.key.toLowerCase()==="p"){
+    e.preventDefault();
+    openPromptLibrary();
+  }
+  if(e.ctrlKey&&e.key==="/"){
+    e.preventDefault();
+    openShortcuts();
+  }
+});
+
+/* ACCOUNT AND LOGIN */
+async function checkAccount(){
+  try{
+    const r=await fetch("/api/me",{credentials:"same-origin"});
+    const data=await r.json();
+    currentUser=data.user||null;
+  }catch(e){currentUser=null}
+  updateAccountUI();
+  await loadChats();
+}
+function updateAccountUI(){
+  if(currentUser){
+    $("username").textContent=currentUser.username||currentUser.email||"Account";
+    $("accountStatus").textContent="Signed in";
+    $("avatar").textContent=(currentUser.username||"S")[0].toUpperCase();
+    $("authButton").textContent="Log out";
+  }else{
+    $("username").textContent="Guest";
+    $("accountStatus").textContent="Not signed in";
+    $("avatar").textContent="G";
+    $("authButton").textContent="Log in";
+  }
+}
+function openAuth(mode){
+  authMode=mode;
+  $("authModal").classList.add("show");
+  $("authError").textContent="";
+  const signup=mode==="signup";
+  $("authTitle").textContent=signup?"Create your account":"Welcome back";
+  $("authDescription").textContent=signup?"Join SLXM AI.":"Log in to your SLXM AI account.";
+  $("authUsername").style.display=signup?"block":"none";
+  $("authUsername").required=signup;
+  $("authPassword").autocomplete=signup?"new-password":"current-password";
+  $("authSubmit").textContent=signup?"Create account":"Log in";
+  $("switchText").textContent=signup?"Already have an account?":"Don't have an account?";
+  $("switchAuth").textContent=signup?"Log in":"Sign up";
+}
+$("authButton").addEventListener("click",async()=>{
+  if(currentUser){
+    try{
+      const r=await fetch("/api/logout",{method:"POST",credentials:"same-origin"});
+      if(!r.ok)throw new Error("Logout failed");
+      currentUser=null;
+      updateAccountUI();
+      conversations=[];
+      currentChat=null;
+      await loadChats();
+      toast("Logged out.");
+    }catch(e){toast("Could not log out.")}
+  }else openAuth("login");
+});
+$("switchAuth").addEventListener("click",()=>openAuth(authMode==="login"?"signup":"login"));
+$("closeAuth").addEventListener("click",()=>$("authModal").classList.remove("show"));
+$("authModal").addEventListener("click",e=>{
+  if(e.target===$("authModal"))$("authModal").classList.remove("show");
+});
+
+$("authForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  $("authError").textContent="";
+  const signup=authMode==="signup";
+  const payload={email:$("authEmail").value.trim(),password:$("authPassword").value};
+  if(signup)payload.username=$("authUsername").value.trim();
+  $("authSubmit").disabled=true;
+  $("authSubmit").textContent="Please wait...";
+  try{
+    const r=await fetch(signup?"/api/signup":"/api/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"same-origin",
+      body:JSON.stringify(payload)
+    });
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(data.error||data.message||"Authentication failed.");
+    currentUser=data.user||null;
+    $("authModal").classList.remove("show");
+    updateAccountUI();
+    await loadChats();
+    toast(signup?"Account created!":"Welcome back!");
+  }catch(error){
+    $("authError").textContent=error.message;
+  }finally{
+    $("authSubmit").disabled=false;
+    $("authSubmit").textContent=signup?"Create account":"Log in";
+  }
+});
+
+/* START SLXM AI */
+loadSettings();
+setMode(settings.defaultMode,false);
+checkAccount();
+</script>
+</body>
+</html>
